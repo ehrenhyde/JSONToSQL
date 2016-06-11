@@ -10,8 +10,12 @@ import java.util.List;
 
 public class JSONFile {
 	
+	public static final String dir = "C:\\Users\\Ehren\\OneDrive\\Documents\\Personal Projects\\Java Projects\\JSONToSQL\\json\\";
+	private static final Charset ENCODING = StandardCharsets.UTF_8;
+	
+	
 	private String filePath;
-	final static Charset ENCODING = StandardCharsets.UTF_8;
+	
 	
 	public JSONFile(String filePath){
 		
@@ -20,7 +24,7 @@ public class JSONFile {
 	}
 	
 	 public List<String> readLines() throws IOException {
-	    Path path = Paths.get(this.filePath);
+	    Path path = Paths.get(JSONFile.dir+this.filePath);
 	    return Files.readAllLines(path, ENCODING);
 	  }
 	 
@@ -30,7 +34,8 @@ public class JSONFile {
 		 for (String line : lines){
 			 combined += line;
 		 }
-		 return combined;
+		 String trimmed = JSONUtils.trimLeftWhitespaceAndCommaColon(combined);
+		 return trimmed;
 	 }
 
 }

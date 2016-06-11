@@ -26,7 +26,7 @@ public class JSONObjTests {
 		TreeMap<String,String> valProps = jsonObj.getValProps();
 		
 		TreeMap<String,String> expected = new TreeMap<String,String>();
-		expected.put("name", "Queensland University of Technology");
+		expected.put("name", "Test");
 		expected.put("code", "QUT");
 		expected.put("worldRanking", "32");
 		
@@ -44,7 +44,7 @@ public class JSONObjTests {
 				
 				String expectedVal = expectedRemaining.get(testedEntry.getKey());
 				String actualVal = testedEntry.getValue();
-				if (expectedVal == actualVal){
+				if (expectedVal.equals(actualVal)){
 					expectedRemaining.remove(testedEntry.getKey());
 				}else{
 					fail("Values not equal for same keys");

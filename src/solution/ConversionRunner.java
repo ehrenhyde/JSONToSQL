@@ -4,7 +4,6 @@ import java.io.IOException;
 
 public class ConversionRunner {
 	
-	private static final String dir = "C:\\Users\\Ehren\\OneDrive\\Documents\\Personal Projects\\Java Projects\\JSONToSQL\\json\\";
 	
 
 	public static void main(String[] args) throws IOException {
@@ -12,7 +11,7 @@ public class ConversionRunner {
 		
 		String aFileName = TestJSONFileNames.THREE_TYPES;
 		
-		JSONFile aFile = new JSONFile(dir+aFileName);
+		JSONFile aFile = new JSONFile(aFileName);
 		
 		String aJSON = aFile.readString();
 		

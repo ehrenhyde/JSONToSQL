@@ -10,47 +10,13 @@ public class JSONObj {
 	
 	public JSONObj(String json) throws JSONException{
 		
-		boolean readKey = true;
-		String keyName = "";
+		valProps = new TreeMap<String,String>();
+		objProps = new TreeMap<String, JSONObj>();
+		arrayProps = new TreeMap<String,JSONArray>();
 		
-		for (int i = json.indexOf("{")+1;json.charAt(i)!='}';){
-			String tailString = json.substring(i,json.length());
-			if (readKey){
-				
-				keyName = JSONUtils.wholeString(tailString);
-				int lenConsumed = JSONUtils.lenWholeString(tailString);
-				i+=lenConsumed;
-			}else{
-				int indexColon = tailString.indexOf(":");
-				String fromProperty = tailString.substring(indexColon+1);
-				fromProperty = JSONUtils.trimWhitespace(fromProperty);
-				
-				char firstChar = fromProperty.charAt(0);
-				if (firstChar == '"'){
-					String val = JSONUtils.wholeString(tailString);
-					valProps.put(keyName, val);
-					int lenConsumed = JSONUtils.lenWholeString(tailString);
-					i+=lenConsumed;
-				}else if(firstChar == '{'){
-					JSONObj jsonObj = new JSONObj(tailString);
-					objProps.put(keyName, jsonObj);
-					int lenConsumed = JSONObj.lenWholeObj(tailString);
-					i+=lenConsumed;
-				}else if(firstChar == '['){
-					JSONArray jsonArray = new JSONArray(tailString);
-					arrayProps.put(keyName, jsonArray);
-					
-					int lenConsumed = JSONArray.lenWholeArray(tailString);
-					i+=lenConsumed;
-					
-				}else{
-					throw new JSONException("Unexpected firstChar in JSONObj constructor loop");
-					
-				}
-			}
-			readKey=!readKey;
-		}
+		this.loadJSON(json);
 	}
+	
 	public static int lenWholeObj(String tailString) throws JSONException{
 		int whiteLeft = tailString.indexOf("{");
 		int i;
@@ -115,6 +81,48 @@ public class JSONObj {
 	
 	public TreeMap<String,JSONArray> getArrayProps(){
 		return this.arrayProps;
+	}
+	
+	private void loadJSON(String json) throws JSONException{
+		boolean readKey = true;
+		String keyName = "";
+		
+		for (int i = json.indexOf("{")+1;json.charAt(i)!='}';){
+			String tailString = json.substring(i,json.length());
+			if (readKey){
+				
+				keyName = JSONUtils.wholeString(tailString);
+				int lenConsumed = JSONUtils.lenWholeString(tailString);
+				i+=lenConsumed;
+			}else{
+				
+				String fromProperty = JSONUtils.trimLeftWhitespaceAndCommaColon(tailString);
+				
+				char firstChar = fromProperty.charAt(0);
+				if (firstChar == '"'){
+					String val = JSONUtils.wholeString(fromProperty);
+					valProps.put(keyName, val);
+					int lenConsumed = JSONUtils.lenWholeString(tailString);
+					i+=lenConsumed;
+				}else if(firstChar == '{'){
+					JSONObj jsonObj = new JSONObj(fromProperty);
+					objProps.put(keyName, jsonObj);
+					int lenConsumed = JSONObj.lenWholeObj(tailString);
+					i+=lenConsumed;
+				}else if(firstChar == '['){
+					JSONArray jsonArray = new JSONArray(fromProperty);
+					arrayProps.put(keyName, jsonArray);
+					
+					int lenConsumed = JSONArray.lenWholeArray(tailString);
+					i+=lenConsumed;
+					
+				}else{
+					throw new JSONException("Unexpected firstChar in JSONObj constructor loop");
+					
+				}
+			}
+			readKey=!readKey;
+		}
 	}
 	
 }
