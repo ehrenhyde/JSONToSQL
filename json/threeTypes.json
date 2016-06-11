@@ -1,0 +1,17 @@
+{
+	"name": "Queensland University of Technology",
+	"schools": [
+		{
+			"name":"Science",
+			"code":"SCI"
+		},
+		{
+			"name":"Maths",
+			"code":"MAT"
+		}
+	],
+	"foundingDetails":{
+		"date":"07/02/1993",
+		"founder":"Steve"
+	}
+}
