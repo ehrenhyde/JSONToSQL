@@ -1,0 +1,15 @@
+{
+	"acedemics": [
+		"Bob","Dave","Sally","Sam","Kate"
+	],
+	"schools": [
+		{
+			"name":"Science",
+			"code":"SCI"
+		},
+		{
+			"name":"Maths",
+			"code":"MAT"
+		}
+	]
+}

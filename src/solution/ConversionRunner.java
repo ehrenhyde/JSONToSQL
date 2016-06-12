@@ -19,6 +19,8 @@ public class ConversionRunner {
 		
 		try {
 			aJSONObj = new JSONObj(aJSON);
+			
+			System.out.println(aJSONObj.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

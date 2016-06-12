@@ -89,7 +89,7 @@ public class JSONUtils {
 		}
 	}
 	
-	private static int lengthLeftWhiteSpaceAndCommaColon(String string){
+	public static int lengthLeftWhiteSpaceAndCommaColon(String string){
 		int lenBeforePotentialComma = lengthLeftWhiteSpace(string);
 		String noLeftWhitespace = string.substring(lenBeforePotentialComma);
 		char first = noLeftWhitespace.charAt(0);
@@ -99,4 +99,54 @@ public class JSONUtils {
 			return lenBeforePotentialComma;
 		}
 	}
+	
+	public static boolean nextNonWhiteCharIs(char target,String containing) throws JSONException{
+		
+		int amountSpaceUntilNext = JSONUtils.lengthLeftWhiteSpaceAndCommaColon(containing);
+		String noWhite = containing.substring(amountSpaceUntilNext);
+		
+		if (noWhite.length() ==0){
+			throw new JSONException("No chars except whitespace in nextNonWhiteCharIs");
+		}
+		char firstChar = noWhite.charAt(0);
+		return (firstChar == target);
+		
+	}
+	
+	private static boolean indexIsLower(int attempt,int bestSoFar){
+		return (attempt >= 0 && attempt < bestSoFar);
+	}
+
+	public static int indexOfPropertyStartChars(String string) {
+		char[] startChars = {'"','{','['};
+		int lowestIndex = -1;
+		for (char attemptChar : startChars){
+			int attemptIndex = string.indexOf(attemptChar);
+			if ( indexIsLower(attemptIndex,lowestIndex) || lowestIndex == -1){
+				lowestIndex = attemptIndex;
+			}
+		}
+		return lowestIndex;
+	}
+
+	public static boolean nextNonWhiteCharCloses(String string, char opening) throws JSONException {
+		char closing;
+		if (opening == '"'){
+			closing = '"';
+		}else if (opening == '{'){
+			closing = '}';
+		}else if (opening == '['){
+			closing = ']';
+		}else{
+			throw new JSONException("Unexpected opening char when testing nextNonWhiteCharCloses");
+		}
+		return nextNonWhiteCharIs(closing,string);
+	}
+	
+	public static boolean nextNonWhiteCharIsClosing(String string) throws JSONException {
+		return (nextNonWhiteCharIs('"',string)
+				|| nextNonWhiteCharIs('}',string)
+				|| nextNonWhiteCharIs(']',string));
+	}
+	
 }

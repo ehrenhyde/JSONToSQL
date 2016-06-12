@@ -131,5 +131,93 @@ public class JSONUtilsTests {
 		
 	}
 	
+	@Test
+	public void tNextNonWhiteElementIsClosingBraceFalse() throws JSONException{
+		
+		String string = " \t  {  sef";
+		assertEquals(false,JSONUtils.nextNonWhiteCharIsClosing(string));
+		
+	}
+	
+	@Test
+	public void tNextNonWhiteElementIsClosingBraceTrue() throws JSONException{
+		
+		String string = " \t  }  sef";
+		assertEquals(true,JSONUtils.nextNonWhiteCharIsClosing(string));
+		
+	}
+	
+	@Test
+	public void tNextNonWhiteElementIsClosingBracketFalse() throws JSONException{
+		
+		String string = " \t  [  sef";
+		assertEquals(false,JSONUtils.nextNonWhiteCharIsClosing(string));
+		
+	}
+	
+	@Test
+	public void tNextNonWhiteElementIsClosingBracketTrue() throws JSONException{
+		
+		String string = " \t  ]  sef";
+		assertEquals(true,JSONUtils.nextNonWhiteCharIsClosing(string));
+		
+	}
+	
+	@Test
+	public void tNextNonWhiteElementIsClosingQuote() throws JSONException{
+		
+		String string = " \t  \"  sef";
+		assertEquals(true,JSONUtils.nextNonWhiteCharIsClosing(string));
+		
+	}
+	
+	@Test
+	public void tNextNonWhiteElementIsClosingQuoteIgnore() throws JSONException{
+		
+		String string = " \t  \\\"  sef";
+		assertEquals(false,JSONUtils.nextNonWhiteCharCloses(string,'"'));
+		
+	}
+	
+	@Test
+	public void tIndexOfPropertyStartCharsBraceFirst(){
+		String startOpening = "{ alsjf s\"dkf[ as \t asf ";
+		String nonStartLeft = "asdfjaosdf asdf a ";
+		String together = nonStartLeft + startOpening;
+		
+		int e = nonStartLeft.length();
+		assertEquals(e,JSONUtils.indexOfPropertyStartChars(together));
+	}
+	
+	@Test
+	public void tIndexOfPropertyStartCharsQuoteFirst(){
+		String startOpening = "\" alsjf{ sdk[f as \t asf ";
+		String nonStartLeft = "asdfjaosdf asdf a ";
+		String together = nonStartLeft + startOpening;
+		
+		int e = nonStartLeft.length();
+		assertEquals(e,JSONUtils.indexOfPropertyStartChars(together));
+	}
+	
+	@Test
+	public void tIndexOfPropertyStartCharsBracketFirst(){
+		String startOpening = "[ alsjf s{dkf \"as \t asf ";
+		String nonStartLeft = "asdfjaosdf asdf a ";
+		String together = nonStartLeft + startOpening;
+		
+		int e = nonStartLeft.length();
+		assertEquals(e,JSONUtils.indexOfPropertyStartChars(together));
+	}
+	
+	@Test
+	public void tIndexOfPropertyStartCharsNoOpening(){
+		String noOpening = " alsjf ]sdkf} as \t asf ";
+		String nonStartLeft = "asdfjaosdf asdf a ";
+		String together = nonStartLeft + noOpening;
+		
+		assertEquals(-1,JSONUtils.indexOfPropertyStartChars(together));
+	}
+	
+	
 
 }
