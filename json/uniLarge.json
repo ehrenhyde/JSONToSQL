@@ -1,0 +1,49 @@
+{
+	"name": "Queensland University of Technology",
+	"schools": [
+		{
+			"name":"Science",
+			"code":"SCI",
+			"units":[
+				{
+					"name":"Introduction to Science",
+					"code":"SCI101"
+				},
+				{
+					"name":"Experimental Method",
+					"code":"SCI102"
+				},
+				{
+					"name":"Reporting Results",
+					"code":"SCI103"
+				},
+				{
+					"name":"Ethics in Science",
+					"code":"SCI104"
+				},
+				{
+					"name":"Lab Safety",
+					"code":"SCI105"
+				},
+				{
+					"name":"Newtonian Physics",
+					"code":"SCI201",
+					"preReqUnits":["SCI101"]
+				},
+				{
+					"name":"Salts and Solutions",
+					"code":"SCI202",
+					"preReqUnits":["SCI101","SCI105"]
+				}
+			]
+		},
+		{
+			"name":"Maths",
+			"code":"MAT"
+		}
+	],
+	"foundingDetails":{
+		"date":"07/02/1993",
+		"founder":"Steve"
+	}
+}

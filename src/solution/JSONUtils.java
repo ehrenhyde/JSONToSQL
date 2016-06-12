@@ -15,7 +15,7 @@ public class JSONUtils {
 			return string;
 		}
 	}
-
+	
 	public static String wholeString(String tailString) throws JSONException {
 		tailString = JSONUtils.trimLeftWhitespaceAndCommaColon(tailString);
 		ensureStartsQuote(tailString);
@@ -36,44 +36,10 @@ public class JSONUtils {
 		}
 		if (found){
 			String trimmed = JSONUtils.trimLeftWhitespaceAndCommaColon(wholeString);
-			String noQuotes = JSONUtils.removeWrappingQuotes(trimmed);
+			String noQuotes = removeWrappingQuotes(trimmed);
 			return noQuotes;
 		}else{
 			throw new JSONException("End of string not found");
-		}
-		
-
-	}
-
-	public static String removeWrappingQuotes(String trimmed) throws JSONException {
-		ensureStartsQuote(trimmed);
-		int indexFirstQuote = 0;
-		int indexClosingQuote = trimmed.lastIndexOf('"');
-		
-		if (indexClosingQuote!=trimmed.length()-1){
-			throw new JSONException("trying to remove wrapping quotes but terminating quote not at end");
-		}
-		
-		String noWrappingQuotes = trimmed.substring(indexFirstQuote+1,indexClosingQuote);
-		return noWrappingQuotes;
-	}
-
-	public static int lenWholeString(String tailString) throws JSONException {
-		
-		int lenLeftWhiteSpace = lengthLeftWhiteSpaceAndCommaColon(tailString);
-		tailString = JSONUtils.trimLeftWhitespaceAndCommaColon(tailString);
-		
-		ensureStartsQuote(tailString);
-		
-		int lenQuotes = 2;
-		
-		return wholeString(tailString).length() + lenLeftWhiteSpace+lenQuotes;
-	}
-	
-	private static void ensureStartsQuote(String string) throws JSONException{
-		int indexOfFirstQuote = string.indexOf('"');
-		if (indexOfFirstQuote != 0){
-			throw new JSONException("Didn't start with double quote : *"+string.substring(0));
 		}
 	}
 	
@@ -87,6 +53,19 @@ public class JSONUtils {
 		}else{
 			return string.length();
 		}
+	}
+	
+	public static String removeWrappingQuotes(String trimmed) throws JSONException {
+		JSONUtils.ensureStartsQuote(trimmed);
+		int indexFirstQuote = 0;
+		int indexClosingQuote = trimmed.lastIndexOf('"');
+		
+		if (indexClosingQuote!=trimmed.length()-1){
+			throw new JSONException("trying to remove wrapping quotes but terminating quote not at end");
+		}
+		
+		String noWrappingQuotes = trimmed.substring(indexFirstQuote+1,indexClosingQuote);
+		return noWrappingQuotes;
 	}
 	
 	public static int lengthLeftWhiteSpaceAndCommaColon(String string){
@@ -148,5 +127,24 @@ public class JSONUtils {
 				|| nextNonWhiteCharIs('}',string)
 				|| nextNonWhiteCharIs(']',string));
 	}
+	
+public static int lenWholeString(String tailString) throws JSONException {
+		
+		int lenLeftWhiteSpace = JSONUtils.lengthLeftWhiteSpaceAndCommaColon(tailString);
+		tailString = JSONUtils.trimLeftWhitespaceAndCommaColon(tailString);
+		
+		ensureStartsQuote(tailString);
+		
+		int lenQuotes = 2;
+		
+		return wholeString(tailString).length() + lenLeftWhiteSpace+lenQuotes;
+	}
+
+public static void ensureStartsQuote(String string) throws JSONException{
+	int indexOfFirstQuote = string.indexOf('"');
+	if (indexOfFirstQuote != 0){
+		throw new JSONException("Didn't start with double quote : *"+string.substring(0));
+	}
+}
 	
 }

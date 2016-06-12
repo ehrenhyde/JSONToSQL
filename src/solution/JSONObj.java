@@ -3,14 +3,16 @@ package solution;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class JSONObj {
-	private TreeMap<String, String> valProps;
+public class JSONObj extends JSONElement {
+	private TreeMap<String, JSONSingleVal> valProps;
 	private TreeMap<String, JSONObj> objProps;
 	private TreeMap<String, JSONArray> arrayProps;
 
 	public JSONObj(String json) throws JSONException {
+		
+		this.elementType = JSONElementType.OBJECT;
 
-		this.valProps = new TreeMap<String, String>();
+		this.valProps = new TreeMap<String, JSONSingleVal>();
 		this.objProps = new TreeMap<String, JSONObj>();
 		this.arrayProps = new TreeMap<String, JSONArray>();
 
@@ -46,13 +48,13 @@ public class JSONObj {
 		result += "{";
 
 		boolean firstProp = true;
-		for (Entry<String, String> map : this.valProps.entrySet()) {
+		for (Entry<String, JSONSingleVal> map : this.valProps.entrySet()) {
 			if (!firstProp) {
 				result += ",";
 			}
 			result += "\"" + map.getKey() + "\"";
 			result += ":";
-			result += "\"" + map.getValue() + "\"";
+			result +=map.getValue().toString();
 			firstProp = false;
 		}
 
@@ -79,7 +81,7 @@ public class JSONObj {
 		return result;
 	}
 
-	public TreeMap<String, String> getValProps() {
+	public TreeMap<String, JSONSingleVal> getValProps() {
 		return this.valProps;
 	}
 
@@ -100,16 +102,16 @@ public class JSONObj {
 			int lenConsumed = 0;
 
 			//extract keyName
-			String keyName = JSONUtils.wholeString(tailString);
+			String keyName = JSONSingleVal.wholeString(tailString);
 			lenConsumed = JSONUtils.lenWholeString(tailString);
 			cursor += lenConsumed;
 			tailString = json.substring(cursor);
 
 			//extract value
 			if (JSONUtils.nextNonWhiteCharIs('"', tailString)) {
-				String val = JSONUtils.wholeString(tailString);
-				this.valProps.put(keyName, val);
-				lenConsumed = JSONUtils.lenWholeString(tailString);
+				JSONSingleVal singleVal = new JSONSingleVal(tailString);
+				this.valProps.put(keyName, singleVal);
+				lenConsumed = JSONSingleVal.lenWholeString(tailString);
 			} else if (JSONUtils.nextNonWhiteCharIs('{', tailString)) {
 				JSONObj jsonObj = new JSONObj(tailString);
 				this.objProps.put(keyName, jsonObj);
@@ -124,6 +126,17 @@ public class JSONObj {
 
 			}
 			cursor += lenConsumed;
+		}
+	}
+
+	@Override
+	public boolean equals(JSONElement jsonElement) throws JSONException {
+		if (jsonElement.getType() == JSONElementType.OBJECT){
+			
+			JSONObj otherObj = (JSONObj)jsonElement;
+			return this.toString().equals(otherObj.toString());
+		}else{
+			throw new JSONException("Comparing JSONElements of different type");
 		}
 	}
 

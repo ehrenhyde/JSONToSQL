@@ -1,32 +1,14 @@
 package solution;
 
-public class JSONElement {
+public abstract class JSONElement {
 	
-	private String elementJSON;
+	public JSONElementType elementType;
 	
-	private JSONElementType elementType;
-	
-	public JSONElement(String tailString) throws JSONException{
-		
-		int whiteLeft = JSONUtils.lengthLeftWhiteSpaceAndCommaColon(tailString);
-		String fromElementStart = tailString.substring(whiteLeft);
-		
-		char firstChar = fromElementStart.charAt(0);
-		if (firstChar == '"'){
-			elementType = JSONElementType.SINGLE_TYPE;
-			this.elementJSON = JSONUtils.wholeString(fromElementStart);
-		}else if (firstChar == '{'){
-			elementType = JSONElementType.OBJECT_TYPE;
-			this.elementJSON = new JSONObj(fromElementStart).toString();
-		}else if(firstChar == '['){
-			elementType = JSONElementType.ARRAY_TYPE;
-			elementJSON = new JSONArray(fromElementStart).toString();
-		}else{
-			throw new JSONException("Unexpected element start *"+firstChar+"*");
-		}
-		
-	
+	public JSONElement(){
+		this.elementType = null;
 	}
+	
+	public abstract boolean equals(JSONElement jsonElement) throws JSONException;
 	
 	public static int lenWholeElement(String json) throws JSONException{
 		
@@ -56,36 +38,25 @@ public class JSONElement {
 			}
 			int lenWholeObj = indexParentStart + lenOpen + parentLen + JSONUtils.lengthLeftWhiteSpaceAndCommaColon(remStrInsideParent) + lenClose;//add space to and including the }
 			return lenWholeObj;
-		}
-		
-		
-		/*if (JSONUtils.nextNonWhiteCharIs('"', json)){
-			return JSONUtils.lenWholeString(json);
-		}else if(JSONUtils.nextNonWhiteCharIs('{', json)){
-			return JSONObj.lenWholeObj(json);
-		}else if (JSONUtils.nextNonWhiteCharIs('[', json)){
-			return JSONArray.lenWholeArray(json);
-		}else{
-			throw new JSONException("Unexpected next non white char in lenWholeElement");
-		}*/
+		}	
 	}
+	
+	public abstract String toString();
 	
 	public JSONElementType getType(){
 		return this.elementType;
 	}
 	
-	public String getElementJSON(){
-		return this.elementJSON;
-	}
-	
-	public boolean equals(JSONElement s){
-		String sJSON = s.elementJSON;
-		String eJSON = this.elementJSON;
-		
-		JSONElementType sType = s.elementType;
-		JSONElementType eType = this.elementType;
-		
-		return (sJSON.equals(eJSON) && sType.equals(eType));
+	public static JSONElementType getType(String json) throws JSONException{
+		if (JSONUtils.nextNonWhiteCharIs('"', json)){
+			return JSONElementType.SINGLE_VAL;
+		}else if (JSONUtils.nextNonWhiteCharIs('{', json)){
+			return JSONElementType.OBJECT;
+		}else if (JSONUtils.nextNonWhiteCharIs('[', json)){
+			return JSONElementType.ARRAY;
+		}else{
+			throw new JSONException("Unexpected opening character when determining type");
+		}
 	}
 	
 }

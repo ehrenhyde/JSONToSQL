@@ -13,6 +13,7 @@ import solution.JSONElement;
 import solution.JSONException;
 import solution.JSONFile;
 import solution.JSONObj;
+import solution.JSONSingleVal;
 import solution.TestJSONFileNames;
 
 public class JSONObjTests {
@@ -25,19 +26,19 @@ public class JSONObjTests {
 		
 		JSONObj jsonObj = new JSONObj(json);
 		
-		TreeMap<String,String> valProps = jsonObj.getValProps();
+		TreeMap<String,JSONSingleVal> valProps = jsonObj.getValProps();
 		
-		TreeMap<String,String> expected = new TreeMap<String,String>();
-		expected.put("name", "Test");
-		expected.put("code", "QUT");
-		expected.put("worldRanking", "32");
+		TreeMap<String,JSONSingleVal> expected = new TreeMap<String,JSONSingleVal>();
+		expected.put("name", new JSONSingleVal("\"Test\""));
+		expected.put("code", new JSONSingleVal( "\"QUT\""));
+		expected.put("worldRanking", new JSONSingleVal( "\"32\""));
 		
 		TestUtils.assertValProps(expected,valProps);
 	}
 	
 	@Test
 	public void tJSONObbJustObjs()throws IOException,JSONException{
-		JSONFile testFile = new JSONFile(TestJSONFileNames.JUSTOBJS);
+		JSONFile testFile = new JSONFile(TestJSONFileNames.JUST_OBJS);
 		String json = testFile.readString();
 		
 		JSONObj jsonObj = new JSONObj(json);
@@ -56,7 +57,7 @@ public class JSONObjTests {
 	
 	@Test
 	public void tJSONObjJustArrays()throws IOException,JSONException{
-		JSONFile testFile = new JSONFile(TestJSONFileNames.JUSTARRAYS);
+		JSONFile testFile = new JSONFile(TestJSONFileNames.JUST_ARRAYS);
 		String json = testFile.readString();
 		
 		JSONObj jsonObj = new JSONObj(json);
@@ -65,11 +66,6 @@ public class JSONObjTests {
 		
 		JSONArray acedemics = new JSONArray("[	\"Bob\",\"Dave\",\"Sally\",\"Sam\",\"Kate\"	]");
 		eRootArrayProps.put("acedemics", acedemics);
-	
-		JSONArray acedemicsOut = eRootArrayProps.get("acedemics");
-		
-		boolean acedemicsIsNull = (acedemicsOut==null);
-		assertEquals(false,acedemicsIsNull);
 		
 		JSONArray schools = new JSONArray("[	{\"name\":\"Science\",\"code\":\"SCI\"	},{\"name\":\"Maths\",\"code\":\"MAT\"	}	]");
 		eRootArrayProps.put("schools", schools);
@@ -85,8 +81,8 @@ public class JSONObjTests {
 		
 		JSONObj s = new JSONObj(json);
 		
-		TreeMap<String,String> eRootVals = new TreeMap<String,String>();
-		eRootVals.put("name", "Queensland University of Technology");
+		TreeMap<String,JSONSingleVal> eRootSingleVals = new TreeMap<String,JSONSingleVal>();
+		eRootSingleVals.put("name",new JSONSingleVal("\"Queensland University of Technology\""));
 		
 		TreeMap<String,JSONObj> eRootObjs = new TreeMap<String,JSONObj>();
 		JSONObj eFoundingDetails = new JSONObj("\"foundingDetails\":{\"date\":\"07/02/1993\",\"founder\":\"Steve\"}");
@@ -96,7 +92,7 @@ public class JSONObjTests {
 		JSONArray schools = new JSONArray("\"schools\": [	{\"name\":\"Science\",\"code\":\"SCI\"	},{\"name\":\"Maths\",\"code\":\"MAT\"	}	]");
 		eRootArrays.put("schools", schools);
 		
-		TestUtils.assertValProps(eRootVals, s.getValProps());
+		TestUtils.assertValProps(eRootSingleVals, s.getValProps());
 		TestUtils.assertObjProps(eRootObjs, s.getObjProps());
 		TestUtils.assertArrayProps(eRootArrays, s.getArrayProps());
 	}

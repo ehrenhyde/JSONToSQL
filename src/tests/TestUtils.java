@@ -8,22 +8,24 @@ import java.util.Map.Entry;
 
 import solution.JSONArray;
 import solution.JSONElement;
+import solution.JSONException;
 import solution.JSONObj;
+import solution.JSONSingleVal;
 
 public class TestUtils {
 	
-	public static void assertAllProps(JSONObj e,JSONObj s){
+	public static void assertAllProps(JSONObj e,JSONObj s) throws JSONException{
 		assertValProps(e.getValProps(),s.getValProps());
 		assertObjProps(e.getObjProps(),s.getObjProps());
 		assertArrayProps(e.getArrayProps(),s.getArrayProps());
 	}
 	
-	public static void assertEqual(JSONArray e,JSONArray s){
+	public static void assertEqual(JSONArray e,JSONArray s) throws JSONException{
 		for (JSONElement sElement: s){
 			if (e.contains(sElement)){
 				e.remove(sElement);
 			}else{
-				fail("Element *"+sElement.getElementJSON()+"* in subject but not in expected array");
+				fail("Element *"+sElement.toString()+"* in subject but not in expected array");
 			}
 		}
 		if (!e.isEmpty()){
@@ -31,7 +33,7 @@ public class TestUtils {
 		}
 	}
 	
-	public static void assertArrayProps(TreeMap<String, JSONArray> expected, TreeMap<String, JSONArray> subject) {
+	public static void assertArrayProps(TreeMap<String, JSONArray> expected, TreeMap<String, JSONArray> subject) throws JSONException {
 		TreeMap<String,JSONArray> eRem = new TreeMap<String,JSONArray>();
 		eRem.putAll(expected);
 		
@@ -53,7 +55,7 @@ public class TestUtils {
 		}
 	}
 
-	public static void assertObjProps(TreeMap<String, JSONObj> expected, TreeMap<String, JSONObj> subject) {
+	public static void assertObjProps(TreeMap<String, JSONObj> expected, TreeMap<String, JSONObj> subject) throws JSONException {
 		TreeMap<String,JSONObj> eRem = new TreeMap<String,JSONObj>();
 		eRem.putAll(expected);
 		
@@ -77,17 +79,17 @@ public class TestUtils {
 		}
 	}
 
-	public static void assertValProps(TreeMap<String,String> expected,TreeMap<String,String> subject){
-		TreeMap<String,String> expectedRemaining = new TreeMap<String,String>();
+	public static void assertValProps(TreeMap<String,JSONSingleVal> expected,TreeMap<String,JSONSingleVal> subject) throws JSONException{
+		TreeMap<String,JSONSingleVal> expectedRemaining = new TreeMap<String,JSONSingleVal>();
 		expectedRemaining.putAll(expected);
 		
 	
-		for (Entry<String,String> testedEntry : subject.entrySet()){
+		for (Entry<String,JSONSingleVal> testedEntry : subject.entrySet()){
 			
 			if (expectedRemaining.containsKey(testedEntry.getKey())){
 				
-				String expectedVal = expectedRemaining.get(testedEntry.getKey());
-				String actualVal = testedEntry.getValue();
+				JSONSingleVal expectedVal = expectedRemaining.get(testedEntry.getKey());
+				JSONSingleVal actualVal = testedEntry.getValue();
 				if (expectedVal.equals(actualVal)){
 					expectedRemaining.remove(testedEntry.getKey());
 				}else{
