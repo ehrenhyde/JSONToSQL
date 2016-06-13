@@ -1,4 +1,5 @@
 #project specific
+resources/secret
 
 # Windows image file caches
 Thumbs.db
