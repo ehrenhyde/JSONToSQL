@@ -17,7 +17,7 @@ import java.util.TreeMap;
 public class SQLDatabase {
 	
 	private final String pathToPassword = "C:\\Users\\Ehren\\OneDrive\\Documents\\Personal Projects\\Java Projects\\JSONToSQL\\resources\\secret\\password.txt";
-	private String dbName;
+	public String dbName;
 	TreeMap<String,SQLTable> tables;
 	
 	private Connection con;
@@ -31,6 +31,22 @@ public class SQLDatabase {
 	      // Setup the connection with the DB
 	      this.con = this.getConnection();
 	      
+	      this.createDb();
+	      this.setDefaultDb();
+	      
+	}
+	
+	private void createDb() throws SQLException {
+		this.executeUpdate("create database " + dbName);
+	}
+	
+	private void setDefaultDb() throws SQLException {
+		this.executeUpdate("use " + dbName + ";");
+	}
+
+	public void terminate() throws SQLException{
+		this.executeUpdate("use sys;");
+		this.executeUpdate("drop database " + dbName + ";");
 	}
 	
 	public void addTable(String tableName,SQLTable table){
@@ -45,8 +61,11 @@ public class SQLDatabase {
 	
 	private Connection getConnection() throws SQLException, IOException{
 		String password = this.getPassword();
-		return DriverManager.getConnection("jdbc:mysql://localhost/jsonTest?useSSL=false"
-			              + "&user=jsonToSQL&password="+password);
+		/*return DriverManager.getConnection("jdbc:mysql://localhost/"+dbName+"?useSSL=false"
+			              + "&user=jsonToSQL&password="+password);*/
+		return DriverManager.getConnection("jdbc:mysql://localhost/?useSSL=false"
+	              + "&user=jsonToSQL&password="+password);
+		
 	}
 	
 	private SQLTable getTable(String tableName) throws SQLObjException{
@@ -57,12 +76,23 @@ public class SQLDatabase {
 		}
 	}
 
-	public ResultSet executeSQL(String sql) throws SQLException {
+	public ResultSet executeQuery(String sql) throws SQLException {
 		// Statements allow to issue SQL queries to the database
 	      Statement stmt = con.createStatement();
 	      // Result set get the result of the SQL query
 	      ResultSet resultSet = stmt
 	          .executeQuery(sql);
 	      return resultSet;
+	}
+	
+	public void executeUpdate(String sql)throws SQLException{
+		Statement stmt = con.createStatement();
+		stmt.executeUpdate(sql);
+	}
+
+	public void writeTable(String tableName) throws SQLException {
+		SQLTable table = this.tables.get(tableName);
+		String sql = table.tableSQL(dbName, tableName);
+		this.executeUpdate(sql);
 	}
 }
