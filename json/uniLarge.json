@@ -1,5 +1,7 @@
 {
 	"name": "Queensland University of Technology",
+	"code": "QUT",
+	"isStateRun":"false",
 	"schools": [
 		{
 			"name":"Science",
@@ -7,7 +9,8 @@
 			"units":[
 				{
 					"name":"Introduction to Science",
-					"code":"SCI101"
+					"code":"SCI101",
+					"failureRate":"23"
 				},
 				{
 					"name":"Experimental Method",
@@ -19,7 +22,8 @@
 				},
 				{
 					"name":"Ethics in Science",
-					"code":"SCI104"
+					"code":"SCI104",
+					"failureRate":"34"
 				},
 				{
 					"name":"Lab Safety",

@@ -24,7 +24,7 @@ public class ConversionRunner {
 			System.out.println(aJSONObj.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}		
+		}	
 	}
 
 }
