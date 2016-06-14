@@ -16,4 +16,9 @@ public class SQLColumnReference {
 	public String getColumnName(){
 		return columnName;
 	}
+	
+	@Override
+	public String toString(){
+		return this.getTableName() + "_" + this.getColumnName();
+	}
 }

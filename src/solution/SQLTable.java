@@ -10,13 +10,16 @@ public class SQLTable {
 	private boolean schemaWritten;
 	private String tableName;
 	
-	private void commonConstructor(String name,ArrayList<SQLValColumn> cols){
-		this.tableName = name;
+	private void setValCols(ArrayList<SQLValColumn> cols){
 		TreeMap<String,SQLValColumn> colsMap = new TreeMap<String,SQLValColumn>();
 		for (SQLValColumn col : cols){
 			colsMap.put(col.getName(), col);
 		}
 		this.columns = colsMap;
+	}
+	private void commonConstructor(String name,ArrayList<SQLValColumn> cols){
+		this.tableName = name;
+		this.setValCols(cols);
 		this.schemaWritten = false;
 		this.idColumn = new SQLIdColumn();
 	}
@@ -24,6 +27,10 @@ public class SQLTable {
 	public SQLTable(String name) {
 		ArrayList<SQLValColumn> cols = new ArrayList<SQLValColumn>();
 		this.commonConstructor(name,cols);
+	}
+	
+	public void addValColumns(ArrayList<SQLValColumn> cols){
+		this.setValCols(cols);
 	}
 	
 	public SQLTable(String name,ArrayList<SQLValColumn> cols){
@@ -262,5 +269,12 @@ public class SQLTable {
 			}
 		}
 		return dependencies;
+	}
+	public Integer nextRowId() {
+		return this.idColumn.getNextRowId();
+	}
+	
+	public SQLColumnReference idColRef(){
+		return new SQLColumnReference(this.getName(),this.idColumnName());
 	}
 }

@@ -179,15 +179,43 @@ public class SQLDatabaseTests {
 	@Test
 	public void createDatabaseFromJSONObj_ValsAndObjs()
 			throws IOException, JSONException, SQLException, SQLObjException {
-		SQLDatabase bananaDb = null;
 		JSONFile bananaFile = new JSONFile(TestJSONFileNames.BANANA);
 		String bananaJSON = bananaFile.readString();
 		JSONObj banana = new JSONObj(bananaJSON);
 
-		bananaDb = new SQLDatabase("Banana", banana);
+		SQLDatabase bananaDb = new SQLDatabase("Banana", banana);
 		bananaDb.writeAll();
+		
+		String sql = "select b.colour,n.calories,c.lunch from banana b "+
+				"inner join nutrition n on n.id = b.nutrition "+
+				"inner join consumptionlikelihood c on c.id = b.consumptionlikelihood ";
+		
+		ResultSet rs = bananaDb.executeQuery(sql);
+		
+		rs.next();
+		String colour = rs.getString(1);
+		String calories = rs.getString(2);
+		String lunch = rs.getString(3);
+		
+		assertEquals("yellow",colour);
+		assertEquals("4242",calories);
+		assertEquals("medium",lunch);
 
 		bananaDb.terminate();
+
+	}
+	
+	@Test
+	public void createDatabaseFromJSONObj_AllThreTypes()
+			throws IOException, JSONException, SQLException, SQLObjException {
+		JSONFile uniFile = new JSONFile(TestJSONFileNames.UNI_LARGE);
+		String uniJSON = uniFile.readString();
+		JSONObj uni = new JSONObj(uniJSON);
+
+		SQLDatabase uniDb = new SQLDatabase("University", uni);
+		uniDb.writeAll();
+
+		uniDb.terminate();
 
 	}
 }

@@ -32,4 +32,9 @@ public class SQLIdColumn{
 	public ArrayList<Integer> getKeys(){
 		return this.keys;
 	}
+
+	public Integer getNextRowId() {
+		int nextId = keys.size()+1;
+		return nextId;
+	}
 }

@@ -14,7 +14,12 @@
 				},
 				{
 					"name":"Experimental Method",
-					"code":"SCI102"
+					"code":"SCI102",
+					"lecturer":{
+						"firstName":"David",
+						"lastName":"Williams"
+						
+					}
 				},
 				{
 					"name":"Reporting Results",
