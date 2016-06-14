@@ -1,0 +1,14 @@
+{
+	"name":"banana",
+	"colour":"yellow",
+	"nutrition" : {
+		"calories":"4242",
+		"vitaminALevel":"high",
+		"vitaminBLevel":"low"
+	},
+	"consumptionLikelihood" : {
+		"breakfast":"high",
+		"lunch":"medium",
+		"dinner":"low"
+	}
+}

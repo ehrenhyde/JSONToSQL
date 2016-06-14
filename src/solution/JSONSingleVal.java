@@ -14,6 +14,10 @@ public class JSONSingleVal extends JSONElement {
 		return "\"" + val + "\"";
 	}
 	
+	public String getVal(){
+		return this.val;
+	}
+	
 	public static String wholeString(String tailString) throws JSONException {
 		return JSONUtils.wholeString(tailString);
 	}

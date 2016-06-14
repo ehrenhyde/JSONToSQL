@@ -1,7 +1,7 @@
 package solution;
 
-public class SQLSimpleValColumn extends SQLValueColumn {
-	public SQLSimpleValColumn(){
-		super();
+public class SQLSimpleValColumn extends SQLValColumn {
+	public SQLSimpleValColumn(String name){
+		super(name);
 	}
 }

@@ -2,20 +2,34 @@ package solution;
 
 import java.util.ArrayList;
 
-public class SQLIdColumn {
-	ArrayList<String> keys;
+public class SQLIdColumn{
+	private ArrayList<Integer> keys;
 	
-	private String name;
+	private final String name = "id";
 	
-	public SQLIdColumn(String name){
-		this.name = name;
+	public SQLIdColumn(){
+		this.keys = new ArrayList<Integer>();
 	}
 	
-	public void addKey(String key){
-		this.keys.add(key);
+	public Integer addKey(){
+		int nextId = keys.size()+1;
+		this.keys.add(nextId);
+		return nextId;
 	}
 	
 	public String getName(){
 		return this.name;
+	}
+	
+	public ArrayList<String> getKeyStrings(){
+		ArrayList<String> ids = new ArrayList<String>();
+		for (int key : this.keys){
+			ids.add(key + "");
+		}
+		return ids;
+	}
+	
+	public ArrayList<Integer> getKeys(){
+		return this.keys;
 	}
 }

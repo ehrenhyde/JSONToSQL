@@ -2,19 +2,30 @@ package tests;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeMap;
+
 import org.junit.Test;
 
+import solution.JSONException;
+import solution.JSONSingleVal;
 import solution.SQLColumnReference;
+import solution.SQLForeignKeyColumn;
 import solution.SQLIdColumn;
+import solution.SQLObjException;
+import solution.SQLSimpleValColumn;
 import solution.SQLTable;
 
 public class SQLTableTests {
 
 	@Test
 	public void simplePrintSQLStatement() {
-		SQLIdColumn unitsIdCol = new SQLIdColumn("idUnitCode");
-		SQLTable units = new SQLTable(unitsIdCol);
+		SQLTable units = new SQLTable("unit");
 		units.addValueColumn("name");
+		units.addValueColumn("code");
 		units.addValueColumn("failureRate");
 		SQLColumnReference uniColRef = new SQLColumnReference("uni", "idCode");
 		units.addForeignKeyColumn("uniIdCode", uniColRef);
@@ -23,8 +34,9 @@ public class SQLTableTests {
 		
 		String e = "";
 		e+="CREATE TABLE `jsonTest`.`unit` (";
-		e+="`idUnitCode` VARCHAR(1024) NOT NULL, ";
-		e+="PRIMARY KEY (`idUnitCode`),";
+		e+="`id` INTEGER NOT NULL, ";
+		e+="PRIMARY KEY (`id`),";
+		e+="`code` VARCHAR(1024) NULL,";
 		e+="`failureRate` VARCHAR(1024) NULL,";
 		e+="`name` VARCHAR(1024) NULL,";
 		e+="`uniIdCode` VARCHAR(1024) NOT NULL, ";
