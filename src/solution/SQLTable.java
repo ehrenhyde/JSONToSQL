@@ -21,7 +21,7 @@ public class SQLTable {
 		this.tableName = name;
 		this.setValCols(cols);
 		this.schemaWritten = false;
-		this.idColumn = new SQLIdColumn();
+		this.idColumn = new SQLIdColumn("id");
 	}
 
 	public SQLTable(String name) {
@@ -107,7 +107,7 @@ public class SQLTable {
 		String foreignTableName = ref.getTableName();
 		String foreignColumnName = ref.getColumnName();
 
-		String constraintName = colName + "_" + foreignColumnName;
+		String constraintName = this.tableName + "_" + colName + "_" + foreignColumnName;
 		String sql = "";
 		sql += "`" + colName + "` INTEGER NOT NULL, ";
 		sql += "INDEX `" + colName + "_idx` (`" + colName + "` ASC),";

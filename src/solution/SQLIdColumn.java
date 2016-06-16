@@ -5,10 +5,11 @@ import java.util.ArrayList;
 public class SQLIdColumn{
 	private ArrayList<Integer> keys;
 	
-	private final String name = "id";
+	private final String name;
 	
-	public SQLIdColumn(){
+	public SQLIdColumn(String name){
 		this.keys = new ArrayList<Integer>();
+		this.name = name;
 	}
 	
 	public Integer addKey(){

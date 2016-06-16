@@ -1,7 +1,7 @@
 package solution;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.sql.SQLException;
 
 public class ConversionRunner {
 	
@@ -10,19 +10,26 @@ public class ConversionRunner {
 	public static void main(String[] args) throws IOException {
 		System.out.println("Starting");
 		
-		String aFileName = TestJSONFileNames.UNI_LARGE;
+		String fileName = TestJSONFileNames.duplicate_array_property_name;
 		
-		JSONFile aFile = new JSONFile(aFileName);
+		JSONFile file = new JSONFile(fileName);
 		
-		String aJSON = aFile.readString();
+		String json = file.readString();
 		
-		JSONObj aJSONObj;
+		JSONObj jsonObj;
 		
 		try {
-			aJSONObj = new JSONObj(aJSON);
+			jsonObj = new JSONObj(json);
 			
-			System.out.println(aJSONObj.toString());
-		} catch (JSONException e) {
+			System.out.println(jsonObj.toString());
+			
+			SQLDatabase db = new SQLDatabase("Sam",jsonObj);
+			
+			db.writeAll();
+			
+			db.terminate();
+			
+		} catch (JSONException | SQLException | SQLObjException e) {
 			e.printStackTrace();
 		}	
 	}

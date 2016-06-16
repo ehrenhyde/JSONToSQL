@@ -185,35 +185,151 @@ public class SQLDatabaseTests {
 
 		SQLDatabase bananaDb = new SQLDatabase("Banana", banana);
 		bananaDb.writeAll();
-		
-		String sql = "select b.colour,n.calories,c.lunch from banana b "+
-				"inner join nutrition n on n.id = b.nutrition "+
-				"inner join consumptionlikelihood c on c.id = b.consumptionlikelihood ";
-		
+
+		String sql = "select b.colour,n.calories,c.lunch from banana b "
+				+ "inner join nutrition n on n.id = b.nutrition "
+				+ "inner join consumptionlikelihood c on c.id = b.consumptionlikelihood ";
+
 		ResultSet rs = bananaDb.executeQuery(sql);
-		
+
 		rs.next();
 		String colour = rs.getString(1);
 		String calories = rs.getString(2);
 		String lunch = rs.getString(3);
-		
-		assertEquals("yellow",colour);
-		assertEquals("4242",calories);
-		assertEquals("medium",lunch);
+
+		assertEquals("yellow", colour);
+		assertEquals("4242", calories);
+		assertEquals("medium", lunch);
 
 		bananaDb.terminate();
 
 	}
-	
+
 	@Test
-	public void createDatabaseFromJSONObj_AllThreTypes()
+	public void createDatabaseFromJSONObj_ArrayOfArrays()
 			throws IOException, JSONException, SQLException, SQLObjException {
-		JSONFile uniFile = new JSONFile(TestJSONFileNames.UNI_LARGE);
+		JSONFile uniFile = new JSONFile(TestJSONFileNames.UNI_PARTNERS);
 		String uniJSON = uniFile.readString();
 		JSONObj uni = new JSONObj(uniJSON);
 
-		SQLDatabase uniDb = new SQLDatabase("University", uni);
+		SQLDatabase partnersUniDb = new SQLDatabase("PartnersUni", uni);
+		partnersUniDb.writeAll();
+
+		partnersUniDb.terminate();
+
+	}
+
+	@Test
+	public void createDatabaseFromJSONObj_AllThreeTypes()
+			throws IOException, JSONException, SQLException, SQLObjException {
+		JSONFile uniFile = new JSONFile(TestJSONFileNames.obj_all);
+		String uniJSON = uniFile.readString();
+		JSONObj uni = new JSONObj(uniJSON);
+
+		SQLDatabase uniDb = new SQLDatabase("objAllUniversity", uni);
 		uniDb.writeAll();
+
+		ResultSet rs;
+		String sql;
+		String uniName;
+		String uniFounder;
+		String uniCode;
+		String schoolName;
+		String unitName;
+		String unitCode;
+		String preReqCode;
+		String partnerName;
+
+		sql = "select u.name,fd.founder " + "from objalluniversity u "
+				+ "left join foundingdetails fd on fd.id = u.foundingdetails;";
+
+		rs = uniDb.executeQuery(sql);
+
+		rs.next();
+		uniName = rs.getString(1);
+		uniFounder = rs.getString(2);
+
+		assertEquals("Queensland University of Technology", uniName);
+		assertEquals("Steve", uniFounder);
+
+		sql = "select u.code,s.name,ut.name " + "from objalluniversity u "
+				+ "left join schools s on s.objalluniversity_id = u.id "
+				+ "left join units ut on ut.schools_id = s.id;";
+
+		rs = uniDb.executeQuery(sql);
+
+		rs.next();
+		uniCode = rs.getString(1);
+		schoolName = rs.getString(2);
+		unitName = rs.getString(3);
+
+		assertEquals("QUT", uniCode);
+		assertEquals("Science", schoolName);
+		assertEquals("Introduction to Science", unitName);
+
+		rs.next();
+		uniCode = rs.getString(1);
+		schoolName = rs.getString(2);
+		unitName = rs.getString(3);
+
+		assertEquals("QUT", uniCode);
+		assertEquals("Science", schoolName);
+		assertEquals("Experimental Method", unitName);
+
+		rs.absolute(8);
+		uniCode = rs.getString(1);
+		schoolName = rs.getString(2);
+		unitName = rs.getString(3);
+
+		assertEquals("QUT", uniCode);
+		assertEquals("Maths", schoolName);
+		assertEquals(null, unitName);
+
+		sql = "select ut.code,put.value as PreReq " + "from units ut "
+				+ "left join prerequnits put on put.units_id = ut.id;";
+
+		rs = uniDb.executeQuery(sql);
+
+		rs.next();
+		unitCode = rs.getString(1);
+		preReqCode = rs.getString(2);
+
+		assertEquals("SCI201", unitCode);
+		assertEquals("SCI101", preReqCode);
+
+		rs.next();
+		unitCode = rs.getString(1);
+		preReqCode = rs.getString(2);
+
+		assertEquals("SCI202", unitCode);
+		assertEquals("SCI101", preReqCode);
+
+		rs.absolute(6);
+		unitCode = rs.getString(1);
+		preReqCode = rs.getString(2);
+
+		assertEquals("SCI103", unitCode);
+		assertEquals(null, preReqCode);
+
+		sql = "select u.code,pe.name " + "from objalluniversity u "
+				+ "left join partners p on p.objalluniversity_id = u.id "
+				+ "left join partners_elements pe on pe.partners_id = p.id;";
+
+		rs = uniDb.executeQuery(sql);
+
+		rs.next();
+		uniCode = rs.getString(1);
+		partnerName = rs.getString(2);
+
+		assertEquals("QUT", uniCode);
+		assertEquals("Suncorp", partnerName);
+
+		rs.absolute(5);
+		uniCode = rs.getString(1);
+		partnerName = rs.getString(2);
+
+		assertEquals("QUT", uniCode);
+		assertEquals("University of Queensland", partnerName);
 
 		uniDb.terminate();
 

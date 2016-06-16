@@ -1,0 +1,36 @@
+{
+	"name": "Queensland University of Technology",
+	"partnerTypes":[
+		[
+			{
+				"name":"Suncorp",
+				"years":"6"
+			},
+			{
+				"name":"Bank of Queensland",
+				"years":"3"
+			}
+		],
+		[
+			{
+				"name":"Department of Human Services",
+				"years":"8"
+			},
+			{
+				"name":"Department of Roads and Transport",
+				"years":"2"
+			}
+		],
+		[
+			{
+				"name":"University of Queensland",
+				"years":"13"
+			},
+			{
+				"name":"Griffith University",
+				"years":"3"
+			}
+		]
+	],
+	"isStateRun":"false"
+}

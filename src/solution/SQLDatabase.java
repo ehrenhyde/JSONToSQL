@@ -51,7 +51,7 @@ public class SQLDatabase {
 		Integer idOfNextRow = masterTable.nextRowId();
 	
 		SQLColumnReference idColRef = new SQLColumnReference(masterTable.getName(), masterTable.idColumnName());
-		TreeMap<String, JSONSingleVal> rowForMaster = this.buildRowValues(idColRef,idOfNextRow,jsonObj);
+		TreeMap<String, JSONSingleVal> rowForMaster = this.buildSingleRowValues(jsonObj,idColRef,idOfNextRow);
 		masterTable.addRow(rowForMaster);
 		
 		this.addTable(dbName, masterTable);
@@ -73,10 +73,8 @@ public class SQLDatabase {
 		for (Entry<String, JSONObj> objProp : objProps.entrySet()) {
 
 			String colName = objProp.getKey();
-			SQLTable forTable = this.assureChildTable(objProp.getKey(), objProp.getValue());
-			String forTableName = forTable.getName();
-			String forColName = forTable.idColumnName();
-			SQLColumnReference forColReference = new SQLColumnReference(forTableName, forColName);
+			SQLTable forTable = this.assureTable(objProp.getKey(), objProp.getValue());
+			SQLColumnReference forColReference = forTable.idColRef();
 			SQLForeignKeyColumn forKeyCol = new SQLForeignKeyColumn(colName, forColReference);
 			cols.add(forKeyCol);
 		}
@@ -84,13 +82,98 @@ public class SQLDatabase {
 		//with arrayProps the child contains the foreignKey to the parent's id
 		TreeMap<String, JSONArray> arrayProps = jsonObj.getArrayProps();
 		for (Entry<String, JSONArray> arrayProp : arrayProps.entrySet()) {
-			SQLTable forTable = this.assureChildTable(arrayProp.getKey(), arrayProp.getValue(),refToThisTableIdCol);
+			String propertyName = arrayProp.getKey();
+			JSONArray propertyValueArray = arrayProp.getValue();
+			this.assureTable(propertyName, propertyValueArray,refToThisTableIdCol);
 		}
 
 		return cols;
 	}
 
-	private TreeMap<String, JSONSingleVal> buildRowValues(SQLColumnReference idColumnReference,Integer rowId,JSONObj jsonObj) throws JSONException, SQLObjException {
+	private void populateTargetTableValues(SQLTable targetTable, JSONArray jsonArray,SQLColumnReference parentIdColRef,Integer parentRowId) throws JSONException, SQLObjException {
+		
+		JSONElementType arrayElementType = jsonArray.getSubElementType();
+		if (arrayElementType == JSONElementType.SINGLE_VAL){
+			for (JSONElement jsonElement : jsonArray){
+				JSONSingleVal jsonSingleVal = (JSONSingleVal) jsonElement;
+				TreeMap<String,JSONSingleVal> newRow = this.buildSingleRowValues( jsonSingleVal);
+				String refToParentColName = parentIdColRef.toString();
+				JSONSingleVal refToParentRow = new JSONSingleVal("\""+parentRowId+"\"");
+				newRow.put(refToParentColName, refToParentRow);
+				targetTable.addRow(newRow);
+			}
+		}else if (arrayElementType == JSONElementType.OBJECT){
+			for (JSONElement jsonElement : jsonArray){
+				JSONObj jsonObj = (JSONObj) jsonElement;
+				TreeMap<String,JSONSingleVal> newRow = this.buildSingleRowValues( jsonObj,targetTable.idColRef(), targetTable.nextRowId());
+				String refToParentColName = parentIdColRef.toString();
+				JSONSingleVal refToParentRow = new JSONSingleVal("\""+parentRowId+"\"");
+				newRow.put(refToParentColName, refToParentRow);
+				targetTable.addRow(newRow);
+			}
+		}else if (arrayElementType == JSONElementType.ARRAY){
+			for (JSONElement jsonElement : jsonArray){
+				JSONArray jsonSubArray = (JSONArray) jsonElement;
+				TreeMap<String,JSONSingleVal> newRow = this.buildSingleRowValues(jsonSubArray,targetTable.idColRef(), targetTable.nextRowId(),parentIdColRef,parentRowId);
+				targetTable.addRow(newRow);
+			}
+		}else{
+			throw new SQLObjException("Unexpected array element type when populating table values from array");
+		}
+	}
+
+	/**
+	 * provides values for all fields excluding the id field
+	 * and references to the parent
+	 * @param jsonSingleVal
+	 * @param idColRef
+	 * @param rowId
+	 * @return
+	 * @throws JSONException
+	 */
+	private TreeMap<String, JSONSingleVal> buildSingleRowValues(JSONSingleVal jsonSingleVal) throws JSONException {
+		
+		TreeMap<String,JSONSingleVal> newRow = new TreeMap<String,JSONSingleVal>();	
+		newRow.put("value", jsonSingleVal);
+	
+		return newRow;
+		
+	}
+
+	/**
+	 * provides values for all fields excluding the id field
+	 * @param jsonArray
+	 * @param idColRef
+	 * @param rowId
+	 * @return
+	 * @throws JSONException 
+	 * @throws SQLObjException 
+	 */
+	private TreeMap<String, JSONSingleVal> buildSingleRowValues(JSONArray jsonArray,SQLColumnReference idColRef, Integer rowId,SQLColumnReference parentIdColRef,Integer parentRowId) throws JSONException, SQLObjException {
+		
+		TreeMap<String,JSONSingleVal> newRow = new TreeMap<String,JSONSingleVal>();
+		
+		newRow.put(parentIdColRef.toString(), new JSONSingleVal("\""+parentRowId+"\""));
+		
+		String childTableName = idColRef.getTableName()+"_elements";
+		
+		SQLTable childTable = this.getTable(childTableName);
+		this.populateTargetTableValues(childTable, jsonArray, idColRef, rowId);
+		
+		return newRow;
+
+	}
+	
+	/**
+	 * provides values for all fields excluding the id field and references back to a parent table
+	 * @param jsonObj
+	 * @param idColRef
+	 * @param rowId
+	 * @return
+	 * @throws JSONException
+	 * @throws SQLObjException
+	 */
+	private TreeMap<String, JSONSingleVal> buildSingleRowValues(JSONObj jsonObj,SQLColumnReference idColRef,Integer rowId) throws JSONException, SQLObjException {
 
 		TreeMap<String, JSONSingleVal> newRow = new TreeMap<String, JSONSingleVal>();
 
@@ -111,7 +194,7 @@ public class SQLDatabase {
 
 			String colName = objProp.getKey();
 
-			Integer forId = this.getChildTableReference(colName, objProp.getValue());
+			Integer forId = this.getChildTableReferenceRowId(colName, objProp.getValue());
 			JSONSingleVal colJSONVal = new JSONSingleVal("\"" + forId + "\"");
 			newRow.put(colName, colJSONVal);
 		}
@@ -124,59 +207,36 @@ public class SQLDatabase {
 			String colName = arrayProp.getKey();
 
 			SQLTable childTable = this.getTable(colName);
-			this.populateTargetTableValues(childTable,arrayProp.getValue(),idColumnReference,rowId);
+			this.populateTargetTableValues(childTable,arrayProp.getValue(),idColRef,rowId);
 		}
 		return newRow;
 	}
-	
-	private TreeMap<String, JSONSingleVal> buidRowValues(JSONSingleVal jsonSingleVal) {
-		
-		TreeMap<String,JSONSingleVal> row = new TreeMap<String,JSONSingleVal>();
-		row.put("value", jsonSingleVal);
-		return row;
-	}
 
-	private void populateTargetTableValues(SQLTable targetTable, JSONArray jsonArray,SQLColumnReference parentIdColumnReference,Integer parentRowId) throws JSONException, SQLObjException {
-		for (JSONElement jsonElement : jsonArray){
-			TreeMap<String, JSONSingleVal> row = new TreeMap<String, JSONSingleVal>();
-			if (jsonElement instanceof JSONObj){
-				JSONObj jsonObj = (JSONObj) jsonElement;
-				Integer idOfNextRow = targetTable.nextRowId();
-			
-				SQLColumnReference idColRef = targetTable.idColRef();
-				row.putAll(this.buildRowValues(idColRef,idOfNextRow,jsonObj));
-			}else if (jsonElement instanceof JSONSingleVal){
-				JSONSingleVal jsonSingleVal = (JSONSingleVal) jsonElement;
-				row.putAll(this.buidRowValues(jsonSingleVal));
-			}else if (jsonElement instanceof JSONArray){
-				throw new SQLObjException("Trying to populate value JSONArray contained inside JSONArray");
-			}
-			row.put(parentIdColumnReference.toString(), new JSONSingleVal("\""+parentRowId+"\""));
-			targetTable.addRow(row);
-		}
-	}
-
-	private Integer getChildTableReference(String childTableName, JSONObj jsonObj)
+	/**
+	 * Adds a row to the child table and returns the id
+	 */
+	private Integer getChildTableReferenceRowId(String childTableName, JSONObj jsonObj)
 			throws SQLObjException, JSONException {
 		
-		SQLTable childTable = this.assureChildTable(childTableName, jsonObj);
+		SQLTable childTable = this.assureTable(childTableName, jsonObj);
 		Integer idOfNextRow = childTable.nextRowId();
 		
 		SQLColumnReference idColRef  = childTable.idColRef();
-		TreeMap<String, JSONSingleVal> row = this.buildRowValues(idColRef,idOfNextRow,jsonObj);
+		TreeMap<String, JSONSingleVal> row = this.buildSingleRowValues(jsonObj,idColRef,idOfNextRow);
 		Integer idOfNewRow = childTable.addRow(row);
 
 		return idOfNewRow;
 
 	}
 
-	private SQLTable assureChildTable(String childTableName, JSONObj jsonObj) throws SQLObjException, JSONException {
-		if(!this.childTableExists(childTableName)){
+	private SQLTable assureTable(String childTableName, JSONObj jsonObj) throws SQLObjException, JSONException {
+		if(!this.tableExists(childTableName)){
 			
 			SQLTable childTable = new SQLTable(childTableName);
 			
-			SQLColumnReference refToThisTableIdCol = new SQLColumnReference(childTable.getName(),childTable.idColumnName());
+			SQLColumnReference refToThisTableIdCol = childTable.idColRef();
 			ArrayList<SQLValColumn> cols = this.createColsFromJSONObj(refToThisTableIdCol, jsonObj);
+			
 			childTable.addValColumns(cols);
 			
 			this.addTable(childTableName, childTable);
@@ -185,17 +245,21 @@ public class SQLDatabase {
 		return this.getTable(childTableName);
 	}
 	
-	private SQLTable assureChildTable(String childTableName, JSONArray jsonArray,SQLColumnReference parentIdRef) throws SQLObjException, JSONException {
-		if (!this.childTableExists(childTableName)){
-			SQLTable childTable = new SQLTable(childTableName);
+	private SQLTable assureTable(String tableName, JSONArray rowValues,SQLColumnReference parentIdRef) throws SQLObjException, JSONException {
+		if (!this.tableExists(tableName)){
 			
-			SQLColumnReference refToThisTableIdCol = new SQLColumnReference(childTable.getName(),childTable.idColumnName());
-			ArrayList<SQLValColumn> cols = this.createColsFromJSONArray(refToThisTableIdCol, jsonArray,parentIdRef);
-			childTable.addValColumns(cols);
+			SQLTable assuredTable = new SQLTable(tableName);
 			
-			this.addTable(childTableName, childTable);
+			SQLColumnReference refToAssuredTableIdCol = assuredTable.idColRef();
+			ArrayList<SQLValColumn> cols = this.createColsFromJSONArray(refToAssuredTableIdCol, rowValues, parentIdRef);
+			
+			SQLForeignKeyColumn refToParentCol = new SQLForeignKeyColumn(parentIdRef.toString(),parentIdRef);
+			cols.add(refToParentCol);			
+			
+			assuredTable.addValColumns(cols);
+			this.addTable(tableName, assuredTable);
 		}
-		return this.getTable(childTableName);
+		return this.getTable(tableName);
 		
 	}
 	
@@ -210,28 +274,53 @@ public class SQLDatabase {
 		return together;
 	}
 
+	/**
+	 * creates value holding columns based on the values of a JSONArray.
+	 * Does not create the id column for a row
+	 * Does not create the reference to parent when passed 2d arrays
+	 * Can create child tables
+	 * @param refToThisTableIdCol
+	 * @param jsonArray
+	 * @param parentIdRef
+	 * @return
+	 * @throws SQLObjException
+	 * @throws JSONException
+	 */
 	private ArrayList<SQLValColumn> createColsFromJSONArray(SQLColumnReference refToThisTableIdCol, JSONArray jsonArray,
 			SQLColumnReference parentIdRef) throws SQLObjException, JSONException {
+		
 		ArrayList<SQLValColumn> allCols = new ArrayList<SQLValColumn>();
-		for(JSONElement jsonElement : jsonArray){
-			if (jsonElement instanceof JSONObj){
+		
+		JSONElementType arrayElementType = jsonArray.getSubElementType();
+		if (arrayElementType == JSONElementType.SINGLE_VAL){
+			
+			SQLValColumn valCol = new SQLSimpleValColumn("value");
+			allCols.add(valCol);
+			
+		}else if (arrayElementType == JSONElementType.OBJECT){
+			
+			for(JSONElement jsonElement : jsonArray){
 				JSONObj jsonObj = (JSONObj) jsonElement;
 				ArrayList<SQLValColumn> assuredCols = this.createColsFromJSONObj(refToThisTableIdCol, jsonObj);
 				allCols = this.mergeColumnArrayLists(allCols, assuredCols);
-			}else if (jsonElement instanceof JSONArray){
-				throw new SQLObjException("Trying to create list of cols from array containing JSONArrays");
-			}else if (jsonElement instanceof JSONSingleVal){
-				SQLValColumn valCol = new SQLSimpleValColumn("value");
-				allCols.add(valCol);
-			}else{
-				throw new SQLObjException("Trying to create list of cols from array containing JSONElements other than JSONObj or JSONArray");
 			}
+			
+		}else if (arrayElementType == JSONElementType.ARRAY){
+			
+			String childTableName = refToThisTableIdCol.getTableName()+"_elements";
+			for (JSONElement jsonElement : jsonArray){
+				JSONArray jsonSubArray = (JSONArray) jsonElement;
+				this.assureTable(childTableName, jsonSubArray, refToThisTableIdCol);
+			}
+			
+		}else{
+			throw new SQLObjException("Trying to create list of cols from array containing JSONElements other than JSONObj or JSONArray or JSONSingleVal");
 		}
 		return allCols;
 	}
 
-	private boolean childTableExists(String childTableName) {
-		return this.tables.containsKey(childTableName);
+	private boolean tableExists(String tableName) {
+		return this.tables.containsKey(tableName);
 	}
 
 	private void createDb() throws SQLException {

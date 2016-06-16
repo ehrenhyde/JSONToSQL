@@ -22,6 +22,10 @@ public class JSONArray extends JSONElement implements Iterable<JSONElement> {
 		this.elements = elements;
 	}
 
+	public JSONElementType getSubElementType(){
+		return this.subElementType;
+	}
+	
 	@Override
 	public String toString() {
 		String string = "";

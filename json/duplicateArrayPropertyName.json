@@ -1,0 +1,41 @@
+{
+	"name": "Sam",
+	"friends":[
+		[
+			{
+				"name":"John",
+				"years":"6",
+				"friends":[
+					"Dave","Ben","Chris"
+				]
+			},
+			{
+				"name":"Dave",
+				"years":"3"
+			}
+		],
+		[
+			{
+				"name":"Alice",
+				"years":"8"
+			},
+			{
+				"name":"Penny",
+				"years":"2",
+				"friends":[
+					"Jack","Jill","Kate"
+				]
+			}
+		],
+		[
+			{
+				"name":"Mitch",
+				"years":"13"
+			},
+			{
+				"name":"Ivon",
+				"years":"3"
+			}
+		]
+	]
+}
