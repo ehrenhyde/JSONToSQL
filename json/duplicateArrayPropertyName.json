@@ -3,15 +3,31 @@
 	"friends":[
 		[
 			{
+				"name":"Dave",
+				"years":"3"
+			},
+			{
 				"name":"John",
 				"years":"6",
 				"friends":[
-					"Dave","Ben","Chris"
+					{
+						"name":"Dave",
+						"years":"2"
+					},
+					{
+						"name":"Ben",
+						"years":"7"
+					},
+					{
+						"name":"Chris",
+						"years":"9",
+						"friends":[
+							"Barbara",
+							"Sally",
+							"Sigrid"
+						]
+					}
 				]
-			},
-			{
-				"name":"Dave",
-				"years":"3"
 			}
 		],
 		[

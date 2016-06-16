@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import solution.JSONArray;
 import solution.JSONException;
 import solution.JSONFile;
 import solution.JSONObj;
@@ -313,7 +314,7 @@ public class SQLDatabaseTests {
 
 		sql = "select u.code,pe.name " + "from objalluniversity u "
 				+ "left join partners p on p.objalluniversity_id = u.id "
-				+ "left join partners_elements pe on pe.partners_id = p.id;";
+				+ "left join partners"+uniDb.getPostfixForElements()+" pe on pe.partners_id = p.id;";
 
 		rs = uniDb.executeQuery(sql);
 
@@ -333,5 +334,213 @@ public class SQLDatabaseTests {
 
 		uniDb.terminate();
 
+	}
+	
+	@Test
+	public void duplicateArrarPropertyNames() throws SQLException, IOException, SQLObjException, JSONException{
+		
+		JSONFile samAndFriendsFile = new JSONFile(TestJSONFileNames.duplicate_array_property_name);
+		String samAndFriendsJSON = samAndFriendsFile.readString();
+		JSONObj samAndFriends = new JSONObj(samAndFriendsJSON);
+
+		SQLDatabase samAndFriendsDb = new SQLDatabase("sam", samAndFriends);
+		samAndFriendsDb.writeAll();
+
+		ResultSet rs;
+		String samName;
+		String friendDeg1Name;
+		String friendDeg2Name;
+		String friendDeg3Name;
+		
+		String sql;
+		
+		sql = "select s.name,fe.name,fef.name,feff.value "+
+		"from sam s "+
+		"inner join friends f on f.sam_id = s.id "+
+		"inner join friends"+samAndFriendsDb.getPostfixForElements()+" fe on fe.friends_id = f.id "+
+		"inner join friends"+samAndFriendsDb.getPostfixForElements()+"friends fef on fef.friends"+samAndFriendsDb.getPostfixForElements()+"_id = fe.id "+
+		"inner join friends"+samAndFriendsDb.getPostfixForElements()+"friendsfriends feff on feff.friends"+samAndFriendsDb.getPostfixForElements()+"friends_id = fef.id;";
+
+		rs = samAndFriendsDb.executeQuery(sql);
+
+		rs.absolute(2);
+		samName = rs.getString(1);
+		friendDeg1Name = rs.getString(2);
+		friendDeg2Name = rs.getString(3);
+		friendDeg3Name = rs.getString(4);
+
+		assertEquals("Sam", samName);
+		assertEquals("John", friendDeg1Name);
+		assertEquals("Chris", friendDeg2Name);
+		assertEquals("Sally", friendDeg3Name);
+		
+	}
+	
+	@Test
+	public void array_obj() throws SQLException, IOException, SQLObjException, JSONException{
+		
+		JSONFile mealsFile = new JSONFile(TestJSONFileNames.ARRAY_OBJ);
+		String mealsJSON = mealsFile.readString();
+		JSONArray meals = new JSONArray(mealsJSON);
+
+		SQLDatabase mealsDb = new SQLDatabase("meals", meals);
+		mealsDb.writeAll();
+
+		ResultSet rs;
+		String mealName;
+		String yumFactor;
+		String chefName;
+		String review;
+		
+		String sql;
+		
+		sql = "select m.name,m.yumFactor,c.name,r.review "+
+"from meals m "+
+"left join chef c on c.id = m.chef "+
+"left join reviews r on r.Meals_id = m.id;";
+
+		rs = mealsDb.executeQuery(sql);
+
+		rs.absolute(1);
+		mealName = rs.getString(1);
+		chefName = rs.getString(3);
+
+		assertEquals("cream brulee", mealName);
+		assertEquals("Sam the Chef", chefName);
+		
+		rs.absolute(2);
+		mealName = rs.getString(1);
+		review = rs.getString(4);
+
+		assertEquals("toad in the hole", mealName);
+		assertEquals("A wonderful hearty meal", review);
+		
+		rs.absolute(4);
+		mealName = rs.getString(1);
+		yumFactor = rs.getString(2);
+
+		assertEquals("pickled snails", mealName);
+		assertEquals("9", yumFactor);
+		
+	}
+	
+	@Test
+	public void array_singleval() throws SQLException, IOException, SQLObjException, JSONException{
+		
+		JSONFile daysFile = new JSONFile(TestJSONFileNames.ARRAY_SINGLEVAL);
+		String daysJSON = daysFile.readString();
+		JSONArray days = new JSONArray(daysJSON);
+
+		SQLDatabase daysDb = new SQLDatabase("days", days);
+		daysDb.writeAll();
+
+		ResultSet rs;
+		String name;
+		
+		String sql;
+		
+		sql = "select value "+
+"from days;";
+
+		rs = daysDb.executeQuery(sql);
+
+		rs.absolute(2);
+		name = rs.getString(1);
+		
+		assertEquals("Tuesday", name);
+		
+		rs.absolute(5);
+		name = rs.getString(1);
+		
+		assertEquals("Friday", name);
+	}
+	
+	@Test
+	public void array_array() throws SQLException, SQLObjException, JSONException, IOException{
+		JSONFile timecountersFile = new JSONFile(TestJSONFileNames.ARRAY_ARRAY);
+		String timecountersJSON = timecountersFile.readString();
+		JSONArray timecounters = new JSONArray(timecountersJSON);
+
+		SQLDatabase timecountersDb = new SQLDatabase("timecounters", timecounters);
+		timecountersDb.writeAll();
+
+		ResultSet rs;
+		String timecounterId;
+		String singleval;
+		String objpropval;
+		String subarrayval;
+		
+		String sql;
+		
+		sql = "select t.id,te.value,te.year,tee.value from timecounters t "+
+"left join timecounters_e te on te.TimeCounters_id = t.id "+
+"left join timecounters_e_e tee on tee.TimeCounters_e_id = te.id "+
+"where t.id = 1 and te.id = 2;";
+
+		rs = timecountersDb.executeQuery(sql);
+
+		rs.absolute(1);
+		timecounterId = rs.getString(1);
+		singleval = rs.getString(2);
+
+		assertEquals("1", timecounterId);
+		assertEquals("Tuesday", singleval);
+		
+		sql = "select t.id,te.value,te.year,tee.value from timecounters t "+
+				"left join timecounters_e te on te.TimeCounters_id = t.id "+
+				"left join timecounters_e_e tee on tee.TimeCounters_e_id = te.id "+
+				"where t.id = 2 and te.id = 13;";
+
+						rs = timecountersDb.executeQuery(sql);
+		
+		rs.absolute(1);
+		timecounterId = rs.getString(1);
+		objpropval = rs.getString(3);
+
+		assertEquals("2", timecounterId);
+		assertEquals("2015", objpropval);
+		
+		sql = "select t.id,te.value,te.year,tee.value from timecounters t "+
+				"left join timecounters_e te on te.TimeCounters_id = t.id "+
+				"left join timecounters_e_e tee on tee.TimeCounters_e_id = te.id "+
+				"where t.id = 3 and tee.id = 3;";
+
+						rs = timecountersDb.executeQuery(sql);
+		
+		
+		rs.absolute(1);
+		timecounterId = rs.getString(1);
+		subarrayval = rs.getString(4);
+
+		assertEquals("3", timecounterId);
+		assertEquals("March", subarrayval);
+		
+		
+	}
+	
+	@Test
+	public void singleval() throws SQLException, SQLObjException, JSONException, IOException{
+		JSONFile singlevalFile = new JSONFile(TestJSONFileNames.SINGLEVAL);
+		String singlevalJSON = singlevalFile.readString();
+		JSONSingleVal singleval = new JSONSingleVal(singlevalJSON);
+
+		SQLDatabase singlevalDb = new SQLDatabase("singleval", singleval);
+		singlevalDb.writeAll();
+
+		ResultSet rs;
+		String dbVal;
+	
+		String sql;
+		
+		sql = "select * from singleval";
+
+		rs = singlevalDb.executeQuery(sql);
+
+		rs.absolute(1);
+		dbVal = rs.getString(2);
+
+		assertEquals("Well done", dbVal);
+		
+		
 	}
 }

@@ -1,7 +1,7 @@
 {
 	"name": "Queensland University of Technology",
 	"code": "QUT",
-	"partners":[
+	"uni partners":[
 		[
 			{
 				"name":"Suncorp",
@@ -33,7 +33,7 @@
 			}
 		]
 	],
-	"isStateRun":"false",
+	"is state run":"false",
 	"schools": [
 		{
 			"name":"Science",
@@ -83,7 +83,7 @@
 			"code":"MAT"
 		}
 	],
-	"foundingDetails":{
+	"founding details":{
 		"date":"07/02/1993",
 		"founder":"Steve"
 	}

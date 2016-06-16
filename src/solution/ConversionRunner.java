@@ -10,28 +10,54 @@ public class ConversionRunner {
 	public static void main(String[] args) throws IOException {
 		System.out.println("Starting");
 		
-		String fileName = TestJSONFileNames.duplicate_array_property_name;
+		String fileName = TestJSONFileNames.UNI_LARGE;
 		
 		JSONFile file = new JSONFile(fileName);
 		
 		String json = file.readString();
 		
-		JSONObj jsonObj;
+		
 		
 		try {
-			jsonObj = new JSONObj(json);
+			JSONElementType type = JSONElement.getType(json);
 			
-			System.out.println(jsonObj.toString());
+			SQLDatabase db;
+			String dbName = "done";
 			
-			SQLDatabase db = new SQLDatabase("Sam",jsonObj);
+			if (type==JSONElementType.OBJECT){
+				JSONObj jsonObj = new JSONObj(json);
+				System.out.println(jsonObj.toString());
+				
+				db = new SQLDatabase(dbName,jsonObj);
+				
+				db.writeAll();
+				
+				db.terminate();
+			}else if (type == JSONElementType.ARRAY){
+				JSONArray jsonArray = new JSONArray(json);
+				System.out.println(jsonArray.toString());
+				db = new SQLDatabase(dbName,jsonArray);
+				
+				db.writeAll();
+				
+				db.terminate();
+			}else if (type == JSONElementType.SINGLE_VAL){
+				JSONSingleVal jsonSingleVal = new JSONSingleVal(json);
+				System.out.println(jsonSingleVal.toString());
+				db = new SQLDatabase(dbName,jsonSingleVal);
+				
+				db.writeAll();
+				
+				db.terminate();
+			}
+		
 			
-			db.writeAll();
-			
-			db.terminate();
 			
 		} catch (JSONException | SQLException | SQLObjException e) {
 			e.printStackTrace();
 		}	
+		
+		System.out.println("done");
 	}
 
 }

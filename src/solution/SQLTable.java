@@ -1,6 +1,7 @@
 package solution;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -17,7 +18,8 @@ public class SQLTable {
 		}
 		this.columns = colsMap;
 	}
-	private void commonConstructor(String name,ArrayList<SQLValColumn> cols){
+	
+private void commonConstructor(String name,ArrayList<SQLValColumn> cols){
 		this.tableName = name;
 		this.setValCols(cols);
 		this.schemaWritten = false;
@@ -30,7 +32,11 @@ public class SQLTable {
 	}
 	
 	public void addValColumns(ArrayList<SQLValColumn> cols){
-		this.setValCols(cols);
+		TreeMap<String,SQLValColumn> newColsMap = new TreeMap<String,SQLValColumn>();
+		for (SQLValColumn col : cols){
+			newColsMap.put(col.getName(), col);
+		}
+		this.columns.putAll(newColsMap);
 	}
 	
 	public SQLTable(String name,ArrayList<SQLValColumn> cols){
@@ -109,7 +115,7 @@ public class SQLTable {
 
 		String constraintName = this.tableName + "_" + colName + "_" + foreignColumnName;
 		String sql = "";
-		sql += "`" + colName + "` INTEGER NOT NULL, ";
+		sql += "`" + colName + "` INTEGER NULL, ";
 		sql += "INDEX `" + colName + "_idx` (`" + colName + "` ASC),";
 		sql += "CONSTRAINT `" + constraintName + "` ";
 		sql += "FOREIGN KEY (`" + colName + "`) ";
@@ -187,7 +193,6 @@ public class SQLTable {
 		return this.idColumn.getName();
 	}
 
-	
 	private String rowValuesString(Integer id,ArrayList<String> colsInOrder){
 		String sql = "(";
 		boolean first = true;
@@ -270,11 +275,30 @@ public class SQLTable {
 		}
 		return dependencies;
 	}
+	
 	public Integer nextRowId() {
 		return this.idColumn.getNextRowId();
 	}
 	
 	public SQLColumnReference idColRef(){
 		return new SQLColumnReference(this.getName(),this.idColumnName());
+	}
+
+	public ArrayList<SQLValColumn> getValCols() {
+		ArrayList<SQLValColumn> allValCols = new ArrayList<SQLValColumn> ();
+		
+		TreeMap<String, SQLForeignKeyColumn> refColsMap = this.getForeignKeyCols();
+		Collection<SQLForeignKeyColumn> refColsCollection = refColsMap.values();
+		for (SQLForeignKeyColumn col : refColsCollection){
+			allValCols.add(col);
+		}
+		
+		TreeMap<String, SQLSimpleValColumn> simpleColsMap = this.getSimpleValCols();
+		Collection<SQLSimpleValColumn> simpleColsCollection = simpleColsMap.values();
+		for (SQLSimpleValColumn col : simpleColsCollection){
+			allValCols.add(col);
+		}
+		
+		return allValCols;
 	}
 }

@@ -27,5 +27,10 @@ public abstract class SQLValColumn {
 	public String getName(){
 		return this.name;
 	}
-	
+
+	public boolean equalsCol(SQLValColumn otherCol) {
+		String thisName = this.name;
+		String otherName = otherCol.name;
+		return(thisName.equals(otherName));
+	}
 }
